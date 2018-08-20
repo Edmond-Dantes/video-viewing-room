@@ -37,6 +37,11 @@ io.on('connection', (socket)=>{
     io.sockets.send(message);
   });
 
+  socket.on('video', (config) => {
+    console.log(config);
+    io.sockets.emit('video', config);
+  });
+
   socket.on('disconnect', () => {
     console.log('user disconnected');
     numberOfUsers--;

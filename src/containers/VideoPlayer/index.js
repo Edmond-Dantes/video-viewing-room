@@ -11,29 +11,8 @@ class VideoPlayer extends React.Component {
     return (
       <ReactPlayer
         controls
-        playing
-        url={this.props.url}
-        config={{
-          youtube: {
-            playerVars: {
-              showinfo: 1,
-              // controls: 0,
-            }
-          },
-          // facebook: {
-          //   appId: '12345'
-          // }
-        }}
-        onReady={() => console.log('onReady')}
-        onStart={() => console.log('onStart')}
-        onPlay={() => console.log('onPlay')}
-        onPause={() => console.log('onPause')}
-        onBuffer={() => console.log('onBuffer')}
-        onSeek={e => console.log('onSeek', e)}
-        onEnded={() => console.log('onEnded')}
-        onError={e => console.log('onError', e)}
-        onProgress={state => console.log('onProgress', state)}
-        onDuration={duration => console.log('onDuration', duration)}
+        ref={this.props.playerRef}
+        {...this.props}
       />
     );
   }

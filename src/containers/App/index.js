@@ -29,7 +29,7 @@ const Input = styled.input`
 const Content = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  align-items: center;
   width: 100%;
   padding: 10px 10px;
 `;
@@ -41,9 +41,18 @@ const FormWrapper = styled.div`
 `;
 
 class App extends React.Component {
-
+  player = false
   state = {
     messages: [],
+    url: 'https://www.youtube.com/watch?v=fQGcmamaPO8',
+    playing: true,
+    volume: 0.8,
+    muted: false,
+    played: 0,
+    loaded: 0,
+    duration: 0,
+    playbackRate: 1.0,
+    loop: false,
   }
 
   componentDidMount() {
@@ -70,19 +79,107 @@ class App extends React.Component {
     }
     );
 
+    socket.on('video', (config) => {
+      console.log('yo2', this.player);
+      this.setState({...config });
+    }
+    );
+
     // socket.emit('testEvent', 'this is a test');
   }
 
+  componentDidUpdate() {
+
+  }
+
+  load = url => {
+    this.setState({
+      url,
+      played: 0,
+      loaded: 0,
+    })
+  }
+  playPause = () => {
+    this.setState({ playing: !this.state.playing });
+  }
+  stop = () => {
+    this.setState({ /*url: null,*/ playing: false });
+  }
+  onPlay = () => {
+    console.log('onPlay');
+    this.setState({ playing: true });
+    this.player.seekTo(parseFloat(this.state.played));
+    // this.socket.emit('video', {...this.state});
+  }
+  onPause = () => {
+    console.log('onPause');
+    this.setState({ playing: false });
+    this.player.seekTo(parseFloat(this.state.played));
+    // this.socket.emit('video', {...this.state});
+  }
+  // onSeekChange = e => {
+  //   console.log('onSeekChange', e);
+  //   this.setState({ played: parseFloat(e.target.value) });
+  //   this.socket.emit('video', {...this.state});
+  // }
+  onProgress = state => {
+    console.log('onProgress', this.state);
+    this.socket.emit('video', {...this.state, ...state});
+  }
+  onEnded = () => {
+    console.log('onEnded');
+    this.setState({ playing: this.state.loop });
+  }
+  onDuration = (duration) => {
+    console.log('onDuration', duration);
+    this.setState({ duration });
+  }
+  // onClickFullscreen = () => {
+  //   screenfull.request(findDOMNode(this.player))
+  // }
+  // renderLoadButton = (url, label) => {
+  //   return (
+  //     <button onClick={() => this.load(url)}>
+  //       {label}
+  //     </button>
+  //   )
+  // }
+  ref = (player) => {
+    this.player = player;
+  }
+
   render() {
-    console.log(this.props);
+    // console.log(this.state);
+    console.log('yo',this.state.playing);
+    const { url, playing, volume, muted, loop, played, loaded, duration, playbackRate } = this.state
     return (
       <div>
         <H1 on={this.props.isChecked}></H1>
         <Toggle style={{display: 'none'}} onClick={this.props.toggle}/>
-        {/*<VideoPlayer
-          url='https://www.youtube.com/watch?v=TJ5CpRtoLro'
-        />*/}
         <Content>
+          {<VideoPlayer
+            // url='https://www.youtube.com/watch?v=fQGcmamaPO8'//'TJ5CpRtoLro'
+            playerRef={this.ref}
+            className='react-player'
+            // width='100%'
+            // height='100%'
+            url={url}
+            playing={playing}
+            loop={loop}
+            playbackRate={playbackRate}
+            // volume={volume}
+            muted={muted}
+            onReady={() => console.log('onReady')}
+            onStart={() => console.log('onStart')}
+            onPlay={this.onPlay}
+            onPause={this.onPause}
+            onBuffer={() => console.log('onBuffer')}
+            onSeek={e=>console.log('onSeek', e)}//this.onSeekChange}
+            onEnded={this.onEnded}
+            onError={e => console.log('onError', e)}
+            onProgress={this.onProgress}
+            onDuration={this.onDuration}
+          />}
           <FormWrapper>
             <Input id='userInput'/>
             <Button
